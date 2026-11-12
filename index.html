@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STRUXA — Structural Analysis</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#E8710A"><meta name="application-name" content="STRUXA"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="STRUXA"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="STRUXA: continuous beams, one-way slab strips and flat-slab equivalent frames, with step-by-step Word reports.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F2ED;--fg:#1c1f26;--mut:#5b6472;--card:#fff;--bd:#E3D6C9;--ac:#E8710A;--br:#6B4226;--ts:#B85408;--ok:#177a3c;--bad:#b3261e;--sh:0 1px 2px rgba(60,40,20,.06),0 4px 14px rgba(60,40,20,.05);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101317;--fg:#e8ebf0;--mut:#9aa4b2;--card:#1a1e25;--bd:#2f3640;--ac:#FF8C2A;--br:#C9A27E;--ts:#FF8C2A;--ok:#59c47f;--bad:#ff8a80;--sh:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101317;--fg:#e8ebf0;--mut:#9aa4b2;--card:#1a1e25;--bd:#2f3640;--ac:#FF8C2A;--br:#C9A27E;--ts:#FF8C2A;--ok:#59c47f;--bad:#ff8a80;--sh:none;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14.5px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:30}
+h1,h2,h3{font-family:'Space Grotesk',Inter,system-ui,sans-serif;margin:0}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 18px;background:var(--card);border-bottom:1px solid var(--bd)}
+.brand{display:flex;align-items:center;gap:10px}.brand h1{font-size:19px;letter-spacing:.06em;line-height:1;font-weight:700}
+.tg{color:var(--mut);font-size:12px;padding-left:10px;border-left:1px solid var(--bd)}
+.seg{display:flex;gap:2px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:3px;margin:0 auto}
+.seg button{background:transparent;color:var(--fg);font-weight:500;padding:6px 12px;white-space:nowrap}
+.seg button.on{background:var(--ac);color:#111;font-weight:600}
+.app{display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);gap:16px;max-width:1500px;margin:0 auto;padding:16px;align-items:start}
+.in{position:sticky;top:calc(env(safe-area-inset-top,0px) + 66px);max-height:calc(100vh - 86px);overflow:auto;padding:1px}
+@media (max-width:1000px){.app{grid-template-columns:1fr;padding:12px}.in{position:static;max-height:none}.tg{display:none}.seg{order:3;width:100%;overflow-x:auto;margin:0}.top{padding:9px 12px}.top .pri{margin-left:auto}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:0 0 12px;box-shadow:var(--sh)}
+h2{font-size:16px;margin:22px 0 8px;color:var(--br)}#out>h2:first-child{margin-top:0}h3{font-size:14px;margin:0 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:end}#slabopt{display:contents}
+label{display:flex;flex-direction:column;font-size:11.5px;color:var(--mut);gap:3px}
+input,select{background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:7px;padding:6px 8px;font:inherit;width:92px}select{width:auto}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+button{background:var(--ac);color:#111;font-weight:600;border:0;border-radius:8px;padding:7px 13px;font:inherit;font-weight:600;cursor:pointer}
+button.g{background:transparent;color:var(--ts,var(--ac));border:1px solid var(--bd);font-weight:500}button.g:hover{border-color:var(--ac)}
+button.x{background:transparent;color:var(--bad);border:1px solid var(--bd);padding:5px 9px;font-weight:500}
+.ld{border-top:1px dashed var(--bd);padding-top:8px;margin-top:8px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--bd);padding:5px 8px;text-align:right;white-space:nowrap}th{color:var(--mut);font-weight:600}th:first-child,td:first-child{text-align:left}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}
+#err{color:var(--bad);font-weight:600;margin:0 0 8px}svg{width:100%;height:auto;display:block}
+.note{font-size:12px;color:var(--mut)}p.note{margin:6px 0}
+.empty{border:1px dashed var(--bd);border-radius:12px;padding:56px 20px;text-align:center;color:var(--mut)}.empty b{display:block;color:var(--fg);font-size:16px;margin-bottom:4px}
+details summary{cursor:pointer;font-weight:600}.ft{max-width:1500px;margin:0 auto;padding:0 18px 24px;color:var(--mut);font-size:12px}
+.items{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 20px;border-bottom:1px solid var(--bd,#ddd)}.chip{background:transparent;color:var(--fg,#111);border:1px solid var(--bd,#ccc);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}.chip.on{background:var(--ac,#E8710A);border-color:var(--ac,#E8710A);color:#111;font-weight:600}.chip.add{border-style:dashed}.chip.del{color:var(--bad,#b3261e)}.isep{width:1px;height:20px;background:var(--bd,#ccc);margin:0 4px}.igap{flex:1}.nm{display:flex;flex-direction:row;align-items:center;gap:6px;font-size:13px}.nm input{width:150px}
+@media(max-width:900px){.items{padding:8px 12px}.igap{display:none}}
+.ghost{background:transparent;color:var(--ts,var(--fg));border:1px solid var(--bd);border-radius:8px;padding:8px 12px;font:inherit;font-weight:500;cursor:pointer}.instmsg{margin:8px 20px;padding:10px 14px;border:1px solid var(--ac);border-radius:10px;background:var(--card);font-size:14px}@media(max-width:600px){.ghost{padding:8px 10px;font-size:13px}}
+</style></head><body>
+<header class="top"><div class="brand"><svg width="30" height="30" viewBox="0 0 100 100" role="img" aria-label="STRUXA logo mark"><rect width="100" height="100" rx="22" fill="#E8710A"/><path d="M70 30C70 14 28 14 28 36C28 56 72 44 72 66C72 86 28 86 28 68" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/><line x1="14" y1="50" x2="86" y2="50" stroke="#111" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#111"/></svg><h1>STRUXA</h1><span class="tg">Structural analysis, step by step</span></div>
+<nav class="seg" id="seg" aria-label="Structural system"><button data-v="beam" onclick="setMod('beam')">Continuous Beam</button><button data-v="slab" onclick="setMod('slab')">One-Way Slab Strip</button><button data-v="flat" onclick="setMod('flat')">Flat Slab Frame</button></nav>
+<button class="ghost" id="inst" onclick="installApp()" title="Install STRUXA as an app on this device">Install app</button><button class="pri" onclick="run()">Analyze</button></header>
+<div id="instmsg" class="instmsg" role="status" hidden></div>
+<div class="items" id="items"></div>
+<main class="app"><section class="in" aria-label="Inputs"><div class="card"><div class="row"><span id="slabopt"></span><button class="g" onclick="addSpan()">+ Span</button><button class="g" onclick="delSpan()">− Span</button><button class="g" onclick="example()">Load example</button></div></div><div id="inp"></div></section>
+<section aria-label="Results"><div id="err"></div><div id="out"><div class="empty"><b>Results appear here</b>Enter the spans and loads, then press Analyze.</div></div><div id="rpt"></div></section></main>
+<footer class="ft">Method: classical slope deflection (beams, slab strips) and moment distribution (flat slab frame); exact fixed-end moments by integration. Loads downward-positive; end moments and rotations counter-clockwise positive; bending moment sagging positive; reactions upward positive. Axial and shear deformations neglected; EI constant within each span.</footer>
+<script>
+/*ENGINE*/
+const EQ=1e-9;
+function dl(w1,w2,a,b,L){return{k:'d',w1,w2,a,b,L}}
+function cumF(l,x){if(l.k=='p')return x>l.a?l.P:0;if(x<=l.a)return 0;const m=Math.min(x,l.b)-l.a,k=(l.w2-l.w1)/(l.b-l.a);return l.w1*m+k*m*m/2}
+function cumM(l,x){if(l.k=='p')return x>l.a?l.P*(x-l.a):0;if(x<=l.a)return 0;const m=Math.min(x,l.b)-l.a,d=x-l.a,k=(l.w2-l.w1)/(l.b-l.a);return l.w1*(d*m-m*m/2)+k*(d*m*m/2-m**3/3)}
+function force(l){return l.k=='p'?l.P:.5*(l.w1+l.w2)*(l.b-l.a)}
+function fem(l){const L=l.L;if(l.k=='p'){const a=l.a,b=L-a;return[l.P*a*b*b/L**2,-l.P*a*a*b/L**2]}
+ const k=(l.w2-l.w1)/(l.b-l.a),c0=l.w1-k*l.a,c1=k;
+ const A=x=>(c0*(L*L*x*x/2-2*L*x**3/3+x**4/4)+c1*(L*L*x**3/3-L*x**4/2+x**5/5))/L**2;
+ const B=x=>(c0*(L*x**3/3-x**4/4)+c1*(L*x**4/4-x**5/5))/L**2;
+ return[A(l.b)-A(l.a),-(B(l.b)-B(l.a))]}
+function resolve(t,L,sg,f){const n=(v,nm)=>{if(!isFinite(v))throw Error('Invalid number in '+nm);return v};
+ if(t.type=='udl')return dl(sg*f*n(t.w,'UDL'),sg*f*t.w,0,L,L);
+ if(t.type=='part'||t.type=='trap'){n(t.s,'start');n(t.e,'end');if(!(t.s>=0&&t.s<t.e&&t.e<=L))throw Error('Load interval must satisfy 0 ≤ start < end ≤ span length ('+L+')');
+  const a=t.type=='part'?t.w:t.w1,b=t.type=='part'?t.w:t.w2;return dl(sg*f*n(a,'load'),sg*f*n(b,'load'),t.s,t.e,L)}
+ if(t.type=='point'){if(!(t.x>=0&&t.x<=L))throw Error('Point load position must lie within the span (0 to '+L+')');return{k:'p',P:sg*n(t.P,'point load'),a:t.x,L}}
+ throw Error('Unknown load')}
+function solveLin(A,b){const n=b.length;for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[p][i]))p=r;
+ if(Math.abs(A[p][i])<1e-300)throw Error('Unstable structure (singular system).');[A[i],A[p]]=[A[p],A[i]];[b[i],b[p]]=[b[p],b[i]];
+ for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
+ const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let s=b[i];for(let c=i+1;c<n;c++)s-=A[i][c]*x[c];x[i]=s/A[i][i]}return x}
+function analyze(M){const n=M.L.length,sup=M.sup,pos=[0];M.L.forEach(l=>pos.push(pos.at(-1)+l));
+ if(!(n>=1))throw Error('At least one span required.');
+ M.L.forEach((l,i)=>{if(!(l>0&&isFinite(l)))throw Error('Span '+(i+1)+': length must be positive.');if(!(M.EI[i]>0))throw Error('Span '+(i+1)+': EI must be positive.')});
+ sup.forEach((s,j)=>{if(s=='free'&&j!=0&&j!=n)throw Error('Free ends only at the two ends of the beam.')});
+ if(n==1&&sup[0]=='free'&&sup[1]=='free')throw Error('Unstable: both ends free.');
+ if(sup.filter(s=>s!='free').length<2&&!sup.includes('fixed'))throw Error('Unstable: needs two vertical supports or one fixed support.');
+ const kind=M.L.map((_,i)=>i==0&&sup[0]=='free'?'cl':i==n-1&&sup[n]=='free'?'cr':'c');
+ const un=[];sup.forEach((s,j)=>{if(s=='pinned')un.push(j)});const idx={};un.forEach((j,r)=>idx[j]=r);
+ const N=un.length,K=Array.from({length:N},()=>Array(N).fill(0)),rhs=Array(N).fill(0),cant={},fem_=[];
+ M.L.forEach((L,i)=>{const ls=M.loads[i];let ab=0,ba=0;const br=ls.map(l=>{const f=fem(l);ab+=f[0];ba+=f[1];return[l,f[0],f[1]]});fem_.push([ab,ba,br]);
+  const ei=M.EI[i];
+  if(kind[i]=='c'){const k=2*ei/L,psi=(M.delta[i]-M.delta[i+1])/L;
+   if(i in idx){const r=idx[i];K[r][r]+=2*k;if(i+1 in idx)K[r][idx[i+1]]+=k;rhs[r]-=ab-3*k*psi}
+   if(i+1 in idx){const r=idx[i+1];K[r][r]+=2*k;if(i in idx)K[r][idx[i]]+=k;rhs[r]-=ba-3*k*psi}}
+  else{const cm=ls.reduce((s,l)=>s+cumM(l,L),0),F=ls.reduce((s,l)=>s+force(l),0);
+   if(kind[i]=='cl'){cant[i]=[0,-cm];if(i+1 in idx)rhs[idx[i+1]]+=cm}else{cant[i]=[L*F-cm,0];if(i in idx)rhs[idx[i]]-=L*F-cm}}});
+ const th=Array(n+1).fill(NaN);sup.forEach((s,j)=>{if(s=='fixed')th[j]=0});
+ if(N){const d=K.map((r,i)=>Math.sqrt(Math.abs(r[i])));if(d.some(v=>v==0))throw Error('Unstable: a joint has no stiffness.');
+  const Ks=K.map((r,i)=>r.map((v,j)=>v/(d[i]*d[j]))),s=solveLin(Ks,rhs.map((v,i)=>v/d[i]));un.forEach((j,r)=>th[j]=s[r]/d[r])}
+ const T=j=>isNaN(th[j])?0:th[j],mem=[];
+ M.L.forEach((L,i)=>{const ls=M.loads[i],[fab,fba,br]=fem_[i],W=ls.reduce((s,l)=>s+force(l),0),k=2*M.EI[i]/L,psi=(M.delta[i]-M.delta[i+1])/L;let mab,mba,RA,RB;
+  if(kind[i]=='c'){mab=fab+k*(2*T(i)+T(i+1)-3*psi);mba=fba+k*(2*T(i+1)+T(i)-3*psi);RA=ls.reduce((s,l)=>s+cumM(l,L),0)/L+(mab+mba)/L;RB=W-RA}
+  else{[mab,mba]=cant[i];RA=kind[i]=='cl'?0:W;RB=W-RA}
+  const m={i:i+1,kind:kind[i],L,EI:M.EI[i],x0:pos[i],loads:ls,fab,fba,br,mab,mba,RA,RB,W,
+   sh(x,s='right'){if(x<=0&&s=='left')return 0;let v=RA;for(const l of ls){if(l.k=='p'){if(l.a<x||(l.a==x&&s=='right'))v-=l.P}else v-=cumF(l,x)}return v},
+   M(x){let v=-mab+RA*x;for(const l of ls)v-=cumM(l,x);return v},
+   w(x){return ls.reduce((s,l)=>s+(l.k=='d'&&x>=l.a&&x<=l.b?l.w1+(l.w2-l.w1)*(x-l.a)/(l.b-l.a):0),0)},
+   bp(){const s=new Set([0,L]);ls.forEach(l=>{s.add(l.a);if(l.k=='d')s.add(l.b)});return[...s].sort((a,b)=>a-b)}};mem.push(m)});
+ const R=Array(n+1).fill(0),RM=Array(n+1).fill(0);mem.forEach((m,i)=>{R[i]+=m.RA;R[i+1]+=m.RB;RM[i]+=m.mab;RM[i+1]+=m.mba});sup.forEach((s,j)=>{if(s!='fixed')RM[j]=0});
+ return{n,mem,pos,sup,th,R,RM,un,delta:M.delta,K,rhs}}
+function roots(f,a,b,N=200){const o=[],e=(b-a)*1e-12,xs=[a+e];for(let k=1;k<N;k++)xs.push(a+(b-a)*k/N);xs.push(b-e);let p=f(xs[0]);
+ for(let k=1;k<xs.length;k++){const q=f(xs[k]);if(p==0)o.push(xs[k-1]);else if(p*q<0){let lo=xs[k-1],hi=xs[k],fl=p;for(let t=0;t<80;t++){const mid=(lo+hi)/2,fm=f(mid);if(fl*fm<=0)hi=mid;else{lo=mid;fl=fm}}o.push((lo+hi)/2)}p=q}return o}
+function crit(r){let V=[],Mv=[],zs=[],cf=[],per=[];const ms=Math.max(1e-300,...r.mem.flatMap(m=>m.bp().map(x=>Math.abs(m.M(x)))));
+ for(const m of r.mem){const c=[];for(const x of m.bp()){for(const s of['left','right']){if(x==0&&s=='left')continue;V.push([m.sh(x,s),m.x0+x,m.i])}c.push([m.M(x),x])}
+  const bp=m.bp();for(let q=0;q<bp.length-1;q++){const a=bp[q],b=bp[q+1];
+   roots(x=>m.sh(x,'right'),a,b).forEach(x=>{zs.push([m.x0+x,m.i]);c.push([m.M(x),x])});
+   roots(x=>-m.w(x),a,b,40).forEach(x=>V.push([m.sh(x,'right'),m.x0+x,m.i]));
+   roots(x=>m.M(x),a,b).forEach(x=>{if(x-a>1e-9*m.L&&b-x>1e-9*m.L&&Math.abs(m.M(x))<=1e-6*ms+1e-9)cf.push([m.x0+x,m.i])})}
+  const mx=c.reduce((p,q)=>q[0]>p[0]?q:p),mn=c.reduce((p,q)=>q[0]<p[0]?q:p);c.forEach(q=>Mv.push([q[0],m.x0+q[1],m.i]));
+  per.push({span:m.i,max:mx[0],xmax:m.x0+mx[1],min:mn[0],xmin:m.x0+mn[1]})}
+ const mxv=a=>a.reduce((p,q)=>q[0]>p[0]?q:p),mnv=a=>a.reduce((p,q)=>q[0]<p[0]?q:p);
+ const sm=r.pos.map((x,j)=>({node:j,x,m:j==0?r.mem[0].M(0):r.mem[j-1].M(r.mem[j-1].L)}));
+ return{vmax:mxv(V),vmin:mnv(V),mmax:mxv(Mv),mmin:mnv(Mv),per,sm,zs,cf}}
+function equil(r){let W=0,sc=0,ml=0,ms=0,ms2=0;for(const m of r.mem){W+=m.W;for(const l of m.loads){const F=force(l);sc+=Math.abs(F);
+  const f1=l.k=='p'?l.P*l.a:m.L*F-cumM(l,m.L);ml-=m.x0*F+f1;ms+=Math.abs(m.x0*F)+Math.abs(f1)}
+  for(const v of[m.fab,m.fba,m.mab,m.mba,...m.bp().map(x=>m.M(x))])ms2=Math.max(ms2,Math.abs(v))}
+ const SR=r.R.reduce((a,b)=>a+b,0),vr=Math.abs(SR-W)/Math.max(sc,1e-300);
+ let mr=r.R.reduce((a,b,j)=>a+b*r.pos[j],0)+r.RM.reduce((a,b)=>a+b,0);const mscl=ms+r.R.reduce((a,b,j)=>a+Math.abs(b*r.pos[j]),0)+r.RM.reduce((a,b)=>a+Math.abs(b),0);
+ const mrr=Math.abs(mr+ml)/Math.max(mscl,1e-300);let jr=0;for(const j of r.un){let s=0;if(j>0)s+=r.mem[j-1].mba;if(j<r.n)s+=r.mem[j].mab;jr=Math.max(jr,Math.abs(s))}
+ let er=0;for(const m of r.mem)er=Math.max(er,Math.abs(m.M(m.L)-m.mba),Math.abs(m.M(0)+m.mab));
+ const sj=jr/Math.max(ms2,1e-300),se=er/Math.max(ms2,1e-300);return{SR,W,vr,mrr,sj,se,ok:vr<=EQ&&mrr<=EQ&&sj<=EQ&&se<=EQ}}
+/*END*/
+/* ---------- UI ---------- */
+const DC={c1:400,c2:400,Hb:3.2,Ha:3};let S={name:'Beam 1',mod:'beam',bw:1,h:250,Er:1,cyc:0,cols:[],area:false,spans:[{L:5,EI:1,loads:[]}],sup:['pinned','pinned']};const ITEMS=[S];let ACT=0;
+const NM={beam:'Beam',slab:'Slab strip',flat:'Flat slab frame'},SYS={beam:'Continuous Beam (Slope Deflection)',slab:'One-Way Slab Continuous Strip (Slope Deflection)',flat:'Equivalent Frame of Flat Slab (Moment Distribution)'};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),defName=m=>NM[m]+' '+(ITEMS.filter(i=>i!==S&&i.mod==m).length+1);
+function mkItem(mod,src){const b=src?JSON.parse(JSON.stringify(src)):{mod,bw:1,h:250,Er:1,cyc:0,cols:[],area:false,spans:[{L:5,EI:1,loads:[]}],sup:['pinned','pinned']};b.name=src?src.name+' (copy)':NM[mod]+' '+(ITEMS.filter(i=>i.mod==mod).length+1);return b}
+function sel(i){ACT=i;S=ITEMS[i];$('err').textContent='';$('out').innerHTML='<div class="empty"><b>Results appear here</b>Press Analyze for this item.</div>';draw()}
+function addItem(m){ITEMS.push(mkItem(m));sel(ITEMS.length-1)}function dupItem(){ITEMS.splice(ACT+1,0,mkItem(0,S));sel(ACT+1)}function delItem(){if(ITEMS.length>1){ITEMS.splice(ACT,1);sel(Math.max(0,ACT-1))}}
+function items(){$('items').innerHTML=ITEMS.map((it,i)=>`<button class="chip${i==ACT?' on':''}" onclick="sel(${i})">${esc(it.name)}</button>`).join('')+`<span class="isep"></span><button class="chip add" onclick="addItem('beam')">+ Beam</button><button class="chip add" onclick="addItem('slab')">+ Slab strip</button><button class="chip add" onclick="addItem('flat')">+ Flat frame</button><span class="igap"></span><label class="nm">Name <input value="${esc(S.name)}" onchange="S.name=this.value.trim()||'Item';items()"></label><button class="chip" onclick="dupItem()">Duplicate</button>${ITEMS.length>1?'<button class="chip del" onclick="delItem()">Delete</button>':''}`}
+const $=id=>document.getElementById(id),f=(v,d=3)=>(Math.abs(v)<5e-10?0:v).toFixed(d),fe=v=>v==0?'0':v.toExponential(4);
+const C={sfd:'#FFD700',bmd:'#E00000',dist:'#90EE90',pt:'#00008B'};
+function setMod(v){const dn=/^(Beam|Slab strip|Flat slab frame) \d+$/.test(S.name);S.mod=v;if(dn)S.name=defName(v);S.bw=+S.bw||1;draw()}function focusOut(){if(innerWidth<1000)$('out').scrollIntoView({behavior:'smooth',block:'start'})}
+function example(){S.mod='beam';S.area=false;S.sup=['pinned','pinned','pinned','pinned'];S.spans=[
+ {L:5,EI:1,loads:[{type:'udl',dir:'down',w:20},{type:'point',dir:'down',P:40,x:2}]},
+ {L:6.5,EI:1,loads:[{type:'part',dir:'down',w:15,s:1,e:4},{type:'trap',dir:'down',w1:0,w2:25,s:4,e:6.5}]},
+ {L:4,EI:1,loads:[{type:'udl',dir:'down',w:12}]}];draw()}
+function addSpan(){S.spans.push({L:5,EI:S.spans.at(-1).EI,loads:[]});S.sup.splice(S.spans.length-1,0,'pinned');S.cols.push({...(S.cols.at(-1)||DC)});draw()}
+function delSpan(){if(S.spans.length>1){S.spans.pop();S.sup.splice(S.spans.length,1);S.cols.length=S.spans.length+1;draw()}}
+function setv(i,j,k,v){const o=j<0?S.spans[i]:S.spans[i].loads[j];o[k]=k=='dir'||k=='type'?v:parseFloat(v)}
+function addLoad(i,t){const d={udl:{w:10},part:{w:10,s:0,e:1},trap:{w1:0,w2:10,s:0,e:1},point:{P:10,x:1}}[t];S.spans[i].loads.push({type:t,dir:'down',...d});draw()}
+function delLoad(i,j){S.spans[i].loads.splice(j,1);draw()}
+const inp=(i,j,k,l)=>`<label>${l}<input type="number" step="any" value="${S.spans[i].loads[j][k]}" onchange="setv(${i},${j},'${k}',this.value)"></label>`;
+const LB={udl:'Full-span UDL',part:'Partial-span Rectangular Load',trap:'Trapezoidal Load',point:'Point load'},u=()=>S.mod=='slab'&&S.area?'kN/m²':'kN/m';
+function draw(){document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.v==S.mod));const slab=S.mod!='beam',fl=S.mod=='flat';
+ if(slab)S.spans.forEach(s=>s.loads=s.loads.filter(l=>l.type!='point'));
+ $('slabopt').innerHTML=slab?`<label>Strip width b (m)<input type="number" step="any" value="${S.bw}" onchange="S.bw=parseFloat(this.value)"></label>${fl?`<label>Slab thickness h (mm)<input type="number" step="any" value="${S.h}" onchange="S.h=parseFloat(this.value)"></label><label>E column / E slab<input type="number" step="any" value="${S.Er}" onchange="S.Er=parseFloat(this.value)"></label><label title="Leave empty to continue until the moments are fully balanced">Cycles (empty = until converged)<input type="number" min="1" step="1" placeholder="Auto" value="${S.cyc||''}" onchange="S.cyc=this.value===''?0:Math.max(1,Math.floor(+this.value)||1)"></label>`:''}<label>Load input<select onchange="S.area=this.value=='a';draw()"><option value="l">Line load (kN/m)</option><option value="a"${S.area?' selected':''}>Area load (kN/m²) → × b</option></select></label>`:'';
+ const n=S.spans.length;let h='';while(S.cols.length<n+1)S.cols.push({...(S.cols.at(-1)||DC)});
+ for(let i=0;i<n;i++){const sp=S.spans[i];
+  const sel=k=>`<label>${k==0?'Left support':k==n?'Right support':'Support '+(k+1)}<select onchange="S.sup[${k}]=this.value">${['pinned','fixed',...(k==0||k==n?['free']:[])].map(o=>`<option${S.sup[k]==o?' selected':''} value="${o}">${o=='free'?'free (cantilever end)':o=='pinned'?'pinned / roller':o}</option>`).join('')}</select></label>`;
+  h+=`<div class="card"><h3>Span ${i+1}</h3><div class="row">${i==0&&!fl?sel(0):''}<label>Length (m)<input type="number" step="any" value="${sp.L}" onchange="setv(${i},-1,'L',this.value)"></label>${fl?'':`<label>EI (relative)<input type="number" step="any" value="${sp.EI}" onchange="setv(${i},-1,'EI',this.value)"></label>${sel(i+1)}`}</div>`;
+  sp.loads.forEach((l,j)=>{const t=l.type;h+=`<div class="ld"><div class="row"><strong>${LB[t]}</strong><label>Direction<select onchange="setv(${i},${j},'dir',this.value)"><option>down</option><option${l.dir=='up'?' selected':''}>up</option></select></label>`+
+   (t=='udl'?inp(i,j,'w','w ('+u()+')'):t=='part'?inp(i,j,'w','w ('+u()+')')+inp(i,j,'s','Start (m)')+inp(i,j,'e','End (m)'):t=='trap'?inp(i,j,'w1','w start')+inp(i,j,'w2','w end')+inp(i,j,'s','Start (m)')+inp(i,j,'e','End (m)'):inp(i,j,'P','P (kN)')+inp(i,j,'x','Position (m)'))+
+   `<button class="x" onclick="delLoad(${i},${j})">Remove</button></div></div>`});
+  h+=`<div class="row ld"><label>Add load<select onchange="if(this.value)addLoad(${i},this.value)"><option value="">choose…</option>${Object.keys(LB).filter(t=>t!='point'||!slab).map(t=>`<option value="${t}">${LB[t]}</option>`).join('')}</select></label></div></div>`}
+ if(fl){S.cols.length=n+1;h+=`<div class="card"><h3>Columns (one per column line, left to right)</h3><div class="tw"><table><tr><th>Column</th><th>c1 along frame (mm)</th><th>c2 across (mm)</th><th>Height below slab (m)</th><th>Height above slab (m, 0 = none)</th></tr>${S.cols.map((c,j)=>`<tr><td>C${j+1}</td>${['c1','c2','Hb','Ha'].map(k=>`<td><input type="number" step="any" value="${c[k]}" onchange="S.cols[${j}].${k}=parseFloat(this.value)"></td>`).join('')}</tr>`).join('')}</table></div></div>`}$('inp').innerHTML=h;items()}
+function model(){const slab=S.mod!='beam',n=S.spans.length,f_=slab&&S.area?S.bw:1;if(slab&&!(S.bw>0))throw Error('Strip width must be positive.');
+ return{L:S.spans.map(s=>s.L),EI:S.spans.map(s=>s.EI),sup:S.sup.slice(),delta:Array(n+1).fill(0),
+  loads:S.spans.map((s,i)=>s.loads.map(l=>resolve(l,s.L,l.dir=='up'?-1:1,f_)))}}
+function table(h,rows){return`<div class="tw"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`}
+function svg(r,kind){const X=[],Y=[];let pv=0;
+ r.mem.forEach((m,mi)=>{const bp=m.bp();X.push(m.x0);Y.push(kind=='v'?(mi?pv:0):-m.mab);
+  for(let q=0;q<bp.length-1;q++){for(let t=0;t<=40;t++){const x=bp[q]+(bp[q+1]-bp[q])*t/40;X.push(m.x0+x);Y.push(kind=='v'?m.sh(x,t==40?'left':'right'):m.M(x))}}
+  pv=m.sh(m.L,'right')});
+ const T=r.pos.at(-1);X.push(T);Y.push(kind=='v'?pv:Y.at(-1));if(kind=='v'){X.push(T);Y.push(0)}
+ const sg=kind=='m'?-1:1,W=900,H=230,pl=60,pr=20,pt=24,pb=30,mx=Math.max(...Y.map(Math.abs),1e-9),sx=x=>pl+(W-pl-pr)*x/T,sy=y=>pt+(H-pt-pb)/2-sg*y/mx*(H-pt-pb)/2*.9;
+ const col=kind=='v'?C.sfd:C.bmd,pts=X.map((x,i)=>sx(x).toFixed(1)+','+sy(Y[i]).toFixed(1)).join(' ');
+ let s=`<svg viewBox="0 0 ${W} ${H}"><text x="${pl}" y="14" font-size="13" fill="currentColor" font-weight="600">${kind=='v'?'Shear Force Diagram (kN)':'Bending Moment Diagram (kN·m) — sagging plotted downward'}</text>`;
+ r.pos.forEach(x=>s+=`<line x1="${sx(x)}" x2="${sx(x)}" y1="${pt}" y2="${H-pb}" stroke="currentColor" opacity=".25" stroke-dasharray="3 3"/>`);
+ s+=`<polygon points="${sx(0)},${sy(0)} ${pts} ${sx(T)},${sy(0)}" fill="${col}" fill-opacity="${kind=='v'?.85:.6}" stroke="${kind=='v'?'#8B7500':col}" stroke-width="1.5"/><line x1="${pl}" x2="${W-pr}" y1="${sy(0)}" y2="${sy(0)}" stroke="currentColor"/>`;
+ const lab=(x,y,v)=>s+=`<text x="${sx(x)+3}" y="${sy(y)+(sg*y>=0?-4:12)}" font-size="11" fill="currentColor">${f(v,2)}</text>`;
+ const c=crit(r);if(kind=='v'){lab(c.vmax[1],c.vmax[0],c.vmax[0]);lab(c.vmin[1],c.vmin[0],c.vmin[0])}
+ else{c.sm.forEach(q=>{if(Math.abs(q.m)>1e-9)lab(q.x,q.m,q.m)});c.per.forEach(p=>{[[p.max,p.xmax],[p.min,p.xmin]].forEach(([v,x])=>{if(Math.abs(v)>1e-9&&!r.pos.some(z=>Math.abs(z-x)<1e-9))lab(x,v,v)})});c.cf.forEach(q=>s+=`<circle cx="${sx(q[0])}" cy="${sy(0)}" r="3.5" fill="currentColor"/>`)}
+ s+=`<text x="${W-pr}" y="${H-8}" text-anchor="end" font-size="11" fill="currentColor">x (m): 0 → ${f(T,2)}</text></svg>`;return s}
+function loadSvg(r){const T=r.pos.at(-1),W=900,H=168,pl=60,pr=20,sx=x=>pl+(W-pl-pr)*x/T,y0=95;
+ const wm=Math.max(1e-9,...r.mem.flatMap(m=>m.loads.filter(l=>l.k=='d').flatMap(l=>[Math.abs(l.w1),Math.abs(l.w2)]))),pm=Math.max(1e-9,...r.mem.flatMap(m=>m.loads.filter(l=>l.k=='p').map(l=>Math.abs(l.P))));
+ let s=`<svg viewBox="0 0 ${W} ${H}"><text x="${pl}" y="14" font-size="13" fill="currentColor" font-weight="600">Loading (light green: distributed, dark blue: point)</text>`;
+ for(const m of r.mem)for(const l of m.loads){if(l.k=='d'){const h1=-l.w1/wm*50,h2=-l.w2/wm*50,a=sx(m.x0+l.a),b=sx(m.x0+l.b);s+=`<polygon points="${a},${y0} ${a},${y0+h1} ${b},${y0+h2} ${b},${y0}" fill="${C.dist}" stroke="#2E8B57"/>`}
+  else{const x=sx(m.x0+l.a),h=(.5+.5*Math.abs(l.P)/pm)*55,d=l.P>=0?-1:1;s+=`<line x1="${x}" x2="${x}" y1="${y0+d*h}" y2="${y0}" stroke="${C.pt}" stroke-width="2.5"/><polygon points="${x},${y0} ${x-5},${y0+d*9} ${x+5},${y0+d*9}" fill="${C.pt}"/><text x="${x+4}" y="${y0+d*h+(d<0?-2:11)}" font-size="11" fill="currentColor">${f(Math.abs(l.P),2)}</text>`}}
+ s+=`<line x1="${sx(0)}" x2="${sx(T)}" y1="${y0}" y2="${y0}" stroke="currentColor" stroke-width="3"/>`;
+ r.pos.forEach((x,j)=>{const t=r.sup[j];if(t=='pinned')s+=`<polygon points="${sx(x)},${y0+2} ${sx(x)-8},${y0+18} ${sx(x)+8},${y0+18}" fill="currentColor"/>`;else if(t=='column')s+=`<rect x="${sx(x)-4}" y="${y0-22}" width="8" height="46" fill="#6B4226"/>`;else if(t=='fixed')s+=`<line x1="${sx(x)}" x2="${sx(x)}" y1="${y0-14}" y2="${y0+16}" stroke="currentColor" stroke-width="6"/>`;s+=`<text x="${sx(x)}" y="${y0+34}" text-anchor="middle" font-size="11" fill="currentColor">${j}</text>`});
+ r.mem.forEach(m=>{const a=sx(m.x0),b=sx(m.x0+m.L);s+=`<line x1="${a}" x2="${b}" y1="145" y2="145" stroke="currentColor" opacity=".6"/><text x="${(a+b)/2}" y="160" text-anchor="middle" font-size="11" fill="currentColor">L${m.i} = ${f(m.L,3)} m</text>`});return s+'</svg>'}
+function run(){$('err').textContent='';$('out').innerHTML='';try{if(S.mod=='flat'){runFlat();return}const M=model(),r=analyze(M),c=crit(r),e=equil(r),slab=S.mod=='slab';
+ let h='<h2>Results</h2>';
+ if(slab&&S.area)h+=`<div class="card note">Area loads converted to line loads using tributary width: w<sub>line</sub> = q × b = q × ${S.bw} m.</div>`;
+ h+=`<div class="card">${loadSvg(r)}${svg(r,'v')}${svg(r,'m')}<p class="note">Signs: shear is positive when the left part pushes up on the right part; bending moment is positive when sagging (tension at the bottom, plotted downward); reactions are positive upward. Black dots on the BMD mark points of contraflexure.</p></div>`;
+ h+='<h2>Fixed-end moments (superposition per span)</h2>'+table(['Span','Load','FEM<sub>AB</sub>','FEM<sub>BA</sub>'],r.mem.flatMap(m=>[...m.br.map(([l,a,b])=>[m.i,l.k=='p'?'Point load P='+f(l.P,3)+' at x='+f(l.a,3):'Distributed w='+f(l.w1,3)+(l.w1==l.w2?'':'→'+f(l.w2,3))+' on ['+f(l.a,3)+', '+f(l.b,3)+']',f(a),f(b)]),[m.i,'<b>Total</b>','<b>'+f(m.fab)+'</b>','<b>'+f(m.fba)+'</b>']]));
+ h+='<h2>Member-end moments (kN·m, counter-clockwise +)</h2>'+table(['Span','Type','L (m)','EI','2EI/L','M<sub>AB</sub>','M<sub>BA</sub>'],r.mem.map(m=>[m.i,m.kind=='c'?'continuous':'cantilever',f(m.L,3),f(m.EI,3),f(2*m.EI/m.L,4),f(m.mab),f(m.mba)]));
+ h+='<h2>Supports</h2>'+table(['Node','x (m)','Support','Rotation θ (rad)','Reaction (kN ↑)','Reaction moment (kN·m)','Moment M in beam'],r.pos.map((x,j)=>[j,f(x,3),r.sup[j],isNaN(r.th[j])?'n/a':fe(r.th[j]),f(r.R[j]),r.sup[j]=='fixed'?f(r.RM[j]):'—',f(c.sm[j].m)]));
+ h+='<h2>Critical values</h2>'+table(['Quantity','Value','at x (m)','Span'],[['Maximum shear',f(c.vmax[0]),f(c.vmax[1]),c.vmax[2]],['Minimum shear',f(c.vmin[0]),f(c.vmin[1]),c.vmin[2]],['Maximum moment (sagging)',f(c.mmax[0]),f(c.mmax[1]),c.mmax[2]],['Minimum moment (hogging)',f(c.mmin[0]),f(c.mmin[1]),c.mmin[2]],...c.per.map(p=>['Span '+p.span+' max / min moment',f(p.max)+' / '+f(p.min),f(p.xmax)+' / '+f(p.xmin),p.span]),...c.zs.map(z=>['Zero shear',0,f(z[0]),z[1]]),...c.cf.map(z=>['Contraflexure (M = 0)',0,f(z[0]),z[1]])]);
+ h+=`<h2>Equilibrium checks</h2><div class="card"><p>Σ reactions = ${f(e.SR,6)}, Σ loads = ${f(e.W,6)}.</p>`+table(['Check','Relative residual','Limit'],[['Vertical forces',e.vr.toExponential(2),'1e-9'],['Moments about x = 0',e.mrr.toExponential(2),'1e-9'],['Joint moments',e.sj.toExponential(2),'1e-9'],['Member end moments vs bending moment',e.se.toExponential(2),'1e-9']])+`<p class="${e.ok?'ok':'bad'}">${e.ok?'All equilibrium checks passed.':'Equilibrium check FAILED — do not use these results.'}</p></div>`;
+ LAST={r,M};$('out').innerHTML=h;focusOut()}catch(x){$('err').textContent='Error: '+x.message}}
+/*REPORT*/
+const X=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),enc=s=>new TextEncoder().encode(s),dec=b=>new TextDecoder().decode(b);
+const CT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CT[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+async function inflate(b){if(typeof DecompressionStream=='undefined')throw Error('This browser cannot read compressed .docx templates. Update the browser or use the default template.');return new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+async function unzip(buf){const u=new Uint8Array(buf),v=new DataView(u.buffer,u.byteOffset,u.byteLength);let e=u.length-22;while(e>=0&&v.getUint32(e,true)!=0x06054b50)e--;if(e<0)throw Error('This is not a valid .docx file');
+ const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const o=[];
+ for(let i=0;i<n;i++){const me=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),el=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),off=v.getUint32(p+42,true),name=dec(u.subarray(p+46,p+46+nl));p+=46+nl+el+cl;
+  const a=off+30+v.getUint16(off+26,true)+v.getUint16(off+28,true),d=u.subarray(a,a+cs);o.push({name,data:me==8?await inflate(d):d})}return o}
+function zip(fs){const L=[],C=[];let off=0;for(const f of fs){const nm=enc(f.name),d=f.data,c=crc(d),h=new DataView(new ArrayBuffer(30)),k=new DataView(new ArrayBuffer(46));
+ h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint16(12,0x21,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+ k.setUint32(0,0x02014b50,true);k.setUint16(4,20,true);k.setUint16(6,20,true);k.setUint16(8,0x800,true);k.setUint16(14,0x21,true);k.setUint32(16,c,true);k.setUint32(20,d.length,true);k.setUint32(24,d.length,true);k.setUint16(28,nm.length,true);k.setUint32(42,off,true);
+ L.push(new Uint8Array(h.buffer),nm,d);C.push(new Uint8Array(k.buffer),nm);off+=30+nm.length+d.length}
+ const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,fs.length,true);e.setUint16(10,fs.length,true);e.setUint32(12,C.reduce((a,x)=>a+x.length,0),true);e.setUint32(16,off,true);
+ return new Blob([...L,...C,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})}
+/* ---- WordprocessingML builders (styles come from the user's template) ---- */
+const rp=(t,o={})=>`<w:r><w:rPr>${o.b?'<w:b/>':''}${o.f?`<w:rFonts w:ascii="${o.f}" w:hAnsi="${o.f}" w:cs="${o.f}"/>`:''}</w:rPr><w:t xml:space="preserve">${X(t)}</w:t></w:r>`;
+const pa=(t,o,pp='')=>`<w:p><w:pPr>${pp}</w:pPr>${rp(t,o)}</w:p>`;
+const W_={pb:()=>'<w:p><w:r><w:br w:type="page"/></w:r></w:p>',h1:t=>pa(t,{},'<w:pStyle w:val="Heading1"/><w:keepNext/>'),h2:t=>pa(t,{},'<w:pStyle w:val="Heading2"/><w:keepNext/>'),p:t=>pa(t),
+ eq:t=>pa(t,{f:'Cambria Math'},'<w:spacing w:after="40"/><w:ind w:left="567"/>'),
+ tbl:(h,rs)=>{const w=Math.floor(9000/h.length);return`<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${['top','left','bottom','right','insideH','insideV'].map(b=>`<w:${b} w:val="single" w:sz="4" w:space="0" w:color="808080"/>`).join('')}</w:tblBorders></w:tblPr><w:tblGrid>${h.map(()=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>`+[h,...rs].map((r,i)=>`<w:tr>${r.map(c=>`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${i?'':'<w:shd w:val="clear" w:color="auto" w:fill="F8D9B8"/>'}</w:tcPr>${pa(String(c),{b:!i},'<w:spacing w:after="0"/>')}</w:tc>`).join('')}</w:tr>`).join('')+'</w:tbl>'+pa('')},
+ img:(i,cx,cy)=>`<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${900+i}" name="Figure ${i}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${900+i}" name="fig${i}.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rIdStx${i}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`};
+const toXml=(B,dims)=>B.map(b=>b[0]=='tbl'?W_.tbl(b[1],b[2]):b[0]=='img'?W_.img(b[1],5760000,Math.round(5760000*dims[b[1]-1])):W_[b[0]](b[1])).join('');
+/* ---- manual-solution content ---- */
+function tailSections(r,B){const g=(v,d=3)=>f(v,d),n=r.n,H=t=>B.push(['h1',t]),H2=t=>B.push(['h2',t]),P=t=>B.push(['p',t]),E=t=>B.push(['eq',t]),TB=(h,rs)=>B.push(['tbl',h,rs]),c=crit(r),e=equil(r);
+ H('6. Support Reactions');
+ r.mem.forEach(m=>{const cm=m.loads.reduce((s,l)=>s+cumM(l,m.L),0);if(m.kind=='c'){E(`Span ${m.i}:  R_A = (Σ moment of loads about B)/L + (M_AB + M_BA)/L = ${g(cm)}/${g(m.L)} + (${g(m.mab)} + ${g(m.mba)})/${g(m.L)} = ${g(m.RA)} kN`);E(`R_B = W − R_A = ${g(m.W)} − ${g(m.RA)} = ${g(m.RB)} kN`)}else E(`Span ${m.i} (cantilever): total load W = ${g(m.W)} kN is carried by the support`)});
+ TB(['Joint','x (m)','Reaction (kN ↑)','Computed as'],r.pos.map((x,j)=>[j,g(x),g(r.R[j]),[j>0?`R_B(span ${j}) = ${g(r.mem[j-1].RB)}`:'',j<n?`R_A(span ${j+1}) = ${g(r.mem[j].RA)}`:''].filter(Boolean).join(' + ')]));
+ E(`Check: ΣR = ${g(e.SR,4)} kN,  ΣW = ${g(e.W,4)} kN  →  difference = ${(e.SR-e.W).toExponential(2)}`);
+ H('7. Shear Force Calculation');P('V(x) = R_A − ∫ w dx − ΣP (loads to the left of x), evaluated segment by segment.');
+ r.mem.forEach(m=>{H2(`Span ${m.i}`);const bp=m.bp();for(let i=0;i<bp.length-1;i++){const a=bp[i],b=bp[i+1],mid=(a+b)/2,w1=m.w(a+.25*(b-a)),k=(m.w(mid)-w1)/(.25*(b-a)),wa=m.w(mid)-k*(mid-a),Va=m.sh(a,'right');
+   E(`${g(a)} ≤ x ≤ ${g(b)}:  V(x) = ${g(Va)}${Math.abs(wa)>1e-12?` − ${g(wa)}(x − ${g(a)})`:''}${Math.abs(k)>1e-12?` − ${g(k/2)}(x − ${g(a)})²`:''}`)}
+  TB(['x (m)','V left (kN)','V right (kN)'],bp.map(x=>[g(x),x==0?'—':g(m.sh(x,'left')),g(m.sh(x,'right'))]));
+  c.zs.filter(z=>z[1]==m.i&&z[0]-m.x0>1e-9&&m.x0+m.L-z[0]>1e-9).forEach(z=>E(`V(x) = 0  at  x = ${g(z[0]-m.x0,4)} m from the left end of span ${m.i}`))});
+ H('8. Bending Moment Calculation');P('M(x) = −M_AB + R_A·x − Σ∫ w(s)(x − s) ds, evaluated at the joints, load breakpoints and the points of zero shear.');
+ r.mem.forEach(m=>{H2(`Span ${m.i}`);const xs=[...new Set([...m.bp(),...c.zs.filter(z=>z[1]==m.i).map(z=>+(z[0]-m.x0).toFixed(9))])].sort((a,b)=>a-b);
+  xs.forEach(x=>{const lc=m.loads.reduce((s,l)=>s+cumM(l,x),0);E(`M(${g(x)}) = −(${g(m.mab)}) + ${g(m.RA)}×${g(x)} − ${g(lc)} = ${g(m.M(x))} kN·m`)})});
+ if(c.cf.length)P('Points of contraflexure (M = 0) at x = '+c.cf.map(z=>g(z[0],3)).join(', ')+' m (from the left end of the beam).');
+ H('9. Structural Diagrams');P('Light green: distributed loads; dark blue: point loads; yellow: shear force diagram; red: bending moment diagram (sagging plotted downward).');
+ B.push(['img',1]);B.push(['img',2]);B.push(['img',3]);
+ H('10. Final Results');TB(['Joint','x (m)','Support','Reaction (kN)','Moment in beam (kN·m)'],r.pos.map((x,j)=>[j,g(x),r.sup[j],g(r.R[j]),g(c.sm[j].m)]));
+ TB(['Quantity','Value','at x (m)'],[['Maximum shear (kN)',g(c.vmax[0]),g(c.vmax[1])],['Minimum shear (kN)',g(c.vmin[0]),g(c.vmin[1])],['Maximum sagging moment (kN·m)',g(c.mmax[0]),g(c.mmax[1])],['Maximum hogging moment (kN·m)',g(c.mmin[0]),g(c.mmin[1])]]);
+ P(`Equilibrium checks (relative residuals): vertical ${e.vr.toExponential(1)}, moments ${e.mrr.toExponential(1)}, joints ${e.sj.toExponential(1)} — ${e.ok?'all passed (limit 1e-9).':'FAILED.'}`);}
+function buildReportMD(o,I){const r=o.r,B=[],g=(v,d=3)=>f(Math.abs(v)<.5*10**-d?0:v,d),sn=v=>(v<0?'− ':'+ ')+g(Math.abs(v)),q=v=>Math.abs(v)<1e-12?'0':String(Number(v.toPrecision(6))),n=r.n,T=r.pos[n],H=t=>B.push(['h1',t]),H2=t=>B.push(['h2',t]),P=t=>B.push(['p',t]),E=t=>B.push(['eq',t]),TB=(h,rs)=>B.push(['tbl',h,rs]);
+ const h_=S.h/1000,Is=S.bw*h_**3/12,J=j=>'J'+(j+1);
+ H('1. General Information');TB(['Item','Value'],[['Project',I.PROJECT_NAME],['Client',I.CLIENT],['Engineer',I.ENGINEER],['Date',I.DATE],['Structural system','Equivalent Frame of Flat Slab'],['Method of analysis','Moment Distribution Method'],['Number of spans',n],['Total length',g(T)+' m'],['Analytical strip width b',g(S.bw)+' m'],['Slab thickness h',g(S.h,0)+' mm'],['E column / E slab',S.Er],['Distribution cycles',o.nc?o.nc+' (user-selected maximum)':'Automatic (until converged)'],['Units','kN, m, kN·m (consistent units)']]);
+ P('Sign convention: loads are positive downward; member-end moments are positive counter-clockwise; bending moment is positive when sagging (tension at the bottom); shear is positive when the left part pushes up on the right part; reactions are positive upward.');
+ H('2. Structural Geometry');TB(['Span','Between column lines','Length L (m)'],r.mem.map(m=>[m.i,`C${m.i} → C${m.i+1}`,g(m.L)]));
+ TB(['Column','c1 along frame (mm)','c2 across (mm)','Height below slab (m)','Height above slab (m)'],S.cols.map((c,j)=>['C'+(j+1),c.c1,c.c2,c.Hb,c.Ha]));
+ H('3. Loading Conditions');const rows=[];S.spans.forEach((s,i)=>s.loads.forEach(l=>rows.push([i+1,LB[l.type],Object.entries(l).filter(([k])=>k!='type'&&k!='dir').map(([k,v])=>k+' = '+v).join(', '),l.dir])));
+ TB(['Span','Load type','Values','Direction'],rows.length?rows:[['—','No loads','','']]);if(S.area)P(`Area loads q were converted to line loads on the strip: w = q × b = q × ${g(S.bw)} m.`);
+ H('4. Structural Analysis');P('The equivalent frame is one line of slab-beam spans framed into the columns above and below. Each joint (column line) is balanced in turn: the unbalanced moment is distributed to the members meeting at the joint in proportion to their stiffness, and half of each distributed slab moment is carried over to the far end of the slab span. The cycles are repeated until the unbalanced moments vanish. Torsional (equivalent-column) and non-prismatic stiffness effects are not included.');
+ E('I_slab = b·h³/12 ;  K_slab = 4·E·I_slab / L ;  carry-over factor = 0.5');E('I_col = c2·c1³/12 ;  K_col = 4·E_c·I_col / H  (far end fixed)');E('DF_member = K_member / ΣK at the joint ;  ΣDF = 1');E('Final end moment = FEM + Σ distributed moments + Σ carried-over moments');
+ H('5. Moment Distribution Solution');H2('5.1 Member stiffness (E of slab = 1)');
+ E(`I_slab = b·h³/12 = ${g(S.bw)}×${g(h_,4)}³/12 = ${q(Is)} m⁴`);r.mem.forEach((m,i)=>E(`Span ${m.i}:  K = 4EI/L = 4×${q(Is)}/${g(m.L)} = ${q(o.Ks[i])}`));
+ o.Kb.forEach((k,j)=>{const c=S.cols[j];[['below',k,c.Hb],['above',o.Ka[j],c.Ha]].forEach(([w,kk,Hh])=>{if(Hh>0)E(`Column C${j+1} ${w}:  I = ${g(c.c2/1000,3)}×${g(c.c1/1000,3)}³/12 = ${q(c.c2/1000*(c.c1/1000)**3/12)} m⁴ ;  K = 4×${S.Er}×I/${g(Hh)} = ${q(kk)}`)})});
+ H2('5.2 Distribution factors');o.DF.forEach((d,j)=>{const pt=[['slab left',j>0?o.Ks[j-1]:0,d.sl],['slab right',j<n?o.Ks[j]:0,d.sr],['column below',o.Kb[j],d.cb],['column above',o.Ka[j],d.ca]].filter(x=>x[1]>0);
+  E(`${J(j)}:  ΣK = ${pt.map(x=>q(x[1])).join(' + ')} = ${q(d.K)}`);E(`      DF: ${pt.map(x=>`${x[0]} = ${q(x[1])}/${q(d.K)} = ${g(x[2],4)}`).join(' ; ')}   (ΣDF = ${g(pt.reduce((s,x)=>s+x[2],0),4)})`)});
+ H2('5.3 Fixed-end moments');
+ const fl=(l,L)=>{const[a,b]=fem(l);if(l.k=='p')return[`FEM_AB = +P·a·b²/L² = +${g(l.P)}×${g(l.a)}×${g(L-l.a)}²/${g(L)}² = ${g(a)}`,`FEM_BA = −P·a²·b/L² = −${g(l.P)}×${g(l.a)}²×${g(L-l.a)}/${g(L)}² = ${g(b)}`];
+  if(l.w1==l.w2&&l.a==0&&l.b==L)return[`FEM_AB = +w·L²/12 = +${g(l.w1)}×${g(L)}²/12 = ${g(a)}`,`FEM_BA = −w·L²/12 = −${g(l.w1)}×${g(L)}²/12 = ${g(b)}`];
+  const k=(l.w2-l.w1)/(l.b-l.a);return[`w(x) = ${g(l.w1)} + (${g(k)})·(x − ${g(l.a)}),  ${g(l.a)} ≤ x ≤ ${g(l.b)}`,`FEM_AB = +∫ w(x)·x(L−x)²/L² dx from ${g(l.a)} to ${g(l.b)}, L = ${g(L)}  →  ${g(a)}`,`FEM_BA = −∫ w(x)·x²(L−x)/L² dx from ${g(l.a)} to ${g(l.b)}  →  ${g(b)}`]};
+ r.mem.forEach(m=>{P(`Span ${m.i}`);if(!m.loads.length)E('No load: FEM = 0');m.loads.forEach(l=>{P(l.k=='p'?'Point load':'Distributed load');fl(l,m.L).forEach(E)});E(`Σ FEM:  FEM_left = ${g(m.fab)} ,  FEM_right = ${g(m.fba)}`)});
+ H2('5.4 Distribution cycles');P(`${o.ok?'Converged after '+o.cyc.length+' cycles.':'Distribution stopped after '+o.cyc.length+' cycles, as selected by the user: the results are approximate and joint moments are not fully balanced.'} Largest unbalanced moment / largest FEM = ${o.hist.at(-1).toExponential(1)} (converged when ≤ 1e-12). In each cycle: Δ = −DF × (unbalanced moment); half of each slab Δ is carried over to the far end of that span.`);
+ TB(['Cycle','Joint','Unbalanced','Δ slab left','Δ slab right','Δ col. below','Δ col. above'],o.cyc.flatMap((cy,k)=>cy.U.map((u,j)=>[k+1,J(j),g(u),g(cy.D[j].sl),g(cy.D[j].sr),g(cy.D[j].cb),g(cy.D[j].ca)])));
+ H2('5.5 Final member-end moments');
+ r.mem.forEach((m,i)=>{const sd=k=>o.cyc.reduce((s,c)=>s+c.D[i+(k=='r'?0:1)][k=='r'?'sr':'sl'],0),cl=o.cyc.reduce((s,c)=>s+.5*c.D[i+1].sl,0),cr=o.cyc.reduce((s,c)=>s+.5*c.D[i].sr,0);
+  E(`Span ${m.i}, left end:   M = FEM + ΣΔ + Σcarry = ${g(m.fab)} ${sn(sd('r'))} ${sn(cl)} = ${g(m.mab)} kN·m`);E(`Span ${m.i}, right end:  M = FEM + ΣΔ + Σcarry = ${g(m.fba)} ${sn(sd('l'))} ${sn(cr)} = ${g(m.mba)} kN·m`)});
+ H2('5.6 Column moments');TB(['Column','Below: at slab','Below: far end','Above: at slab','Above: far end'],o.cb.map((v,j)=>['C'+(j+1),g(v),g(o.cbf[j]),g(o.ca[j]),g(o.caf[j])]));
+ P('Column far-end moments are half of the near-end moments (carry-over 0.5, far end fixed). At every joint the slab and column end moments sum to zero.');
+ tailSections(r,B);return B}
+function buildReport(r,M,I){const B=[],g=(v,d=3)=>f(v,d),q=v=>Math.abs(v)<1e-12?'0':String(Number(v.toPrecision(6))),n=r.n,sl=S.mod=='slab',T=r.pos[n],H=t=>B.push(['h1',t]),H2=t=>B.push(['h2',t]),P=t=>B.push(['p',t]),E=t=>B.push(['eq',t]),TB=(h,rs)=>B.push(['tbl',h,rs]),c=crit(r),e=equil(r);
+ const sysn=sl?'One-Way Slab Continuous Strip':'Continuous Beam',th=j=>r.sup[j]=='fixed'?'0':'θ'+j;
+ H('1. General Information');TB(['Item','Value'],[['Project',I.PROJECT_NAME],['Client',I.CLIENT],['Engineer',I.ENGINEER],['Date',I.DATE],['Structural system',sysn],['Method of analysis','Slope Deflection Method'],['Number of spans',n],['Total length',g(T)+' m'],['Units','kN, m, kN·m (consistent units)']]);
+ P('Sign convention: loads are positive downward; end moments, FEMs, joint rotations (θ) and chord rotation (ψ) are positive counter-clockwise; bending moment is positive when sagging (tension at the bottom); shear is positive when the left part pushes up on the right part; reactions are positive upward.');
+ H('2. Structural Geometry');TB(['Span','Joints','Length L (m)','EI (relative)','Left support','Right support'],r.mem.map(m=>[m.i,`${m.i-1} → ${m.i}`,g(m.L),g(m.EI),r.sup[m.i-1],r.sup[m.i]]));
+ if(sl)P(`The slab is analysed as a continuous strip of width b = ${g(S.bw)} m.`+(S.area?` Area loads q are converted to line loads by w = q × b = q × ${g(S.bw)}.`:''));
+ H('3. Loading Conditions');const rows=[];S.spans.forEach((s,i)=>s.loads.forEach(l=>rows.push([i+1,LB[l.type],Object.entries(l).filter(([k])=>k!='type'&&k!='dir').map(([k,v])=>k+' = '+v).join(', '),l.dir])));
+ TB(['Span','Load type','Values','Direction'],rows.length?rows:[['—','No loads','','']]);
+ H('4. Structural Analysis');P('The continuous member is divided into spans AB between joints. Each member-end moment is written with the slope-deflection equations, joint equilibrium (ΣM = 0 at every joint with free rotation) gives the unknown rotations, and the final end moments are back-substituted. Reactions, shear and bending moment follow from statics of each span. Axial and shear deformations are neglected; EI is constant within each span.');
+ E('M_AB = FEM_AB + (2EI/L)(2θ_A + θ_B − 3ψ)');E('M_BA = FEM_BA + (2EI/L)(2θ_B + θ_A − 3ψ)');E('FEM_AB = +∫ w(x)·x(L−x)²/L² dx ;  FEM_BA = −∫ w(x)·x²(L−x)/L² dx ;  point load: +Pab²/L², −Pa²b/L²');E('ψ = (δ_A − δ_B)/L = 0  (no support settlement)');
+ H('5. Slope Deflection Solution');H2('5.1 Stiffness and fixed-end moments');
+ const fl=(l,L)=>{const[a,b]=fem(l);if(l.k=='p')return[`FEM_AB = +P·a·b²/L² = +${g(l.P)}×${g(l.a)}×${g(L-l.a)}²/${g(L)}² = ${g(a)}`,`FEM_BA = −P·a²·b/L² = −${g(l.P)}×${g(l.a)}²×${g(L-l.a)}/${g(L)}² = ${g(b)}`];
+  if(l.w1==l.w2&&l.a==0&&l.b==L)return[`FEM_AB = +w·L²/12 = +${g(l.w1)}×${g(L)}²/12 = ${g(a)}`,`FEM_BA = −w·L²/12 = −${g(l.w1)}×${g(L)}²/12 = ${g(b)}`];
+  const k=(l.w2-l.w1)/(l.b-l.a);return[`w(x) = ${g(l.w1)} + (${g(k)})·(x − ${g(l.a)}),  ${g(l.a)} ≤ x ≤ ${g(l.b)}`,`FEM_AB = +∫ w(x)·x(L−x)²/L² dx from ${g(l.a)} to ${g(l.b)}, L = ${g(L)}  →  ${g(a)}`,`FEM_BA = −∫ w(x)·x²(L−x)/L² dx from ${g(l.a)} to ${g(l.b)}  →  ${g(b)}`]};
+ r.mem.forEach(m=>{const k=2*m.EI/m.L;P(`Span ${m.i} (joint ${m.i-1} → ${m.i})`);E(`L = ${g(m.L)} m,  EI = ${g(m.EI)},  k = 2EI/L = 2×${g(m.EI)}/${g(m.L)} = ${g(k,4)}`);
+  if(!m.br.length)E('No load on this span: FEM_AB = FEM_BA = 0');m.br.forEach(([l])=>{P(l.k=='p'?'Point load':'Distributed load');fl(l,m.L).forEach(E)});
+  if(m.br.length)E(`Σ FEM (superposition):  FEM_AB = ${g(m.fab)},  FEM_BA = ${g(m.fba)}`)});
+ H2('5.2 Slope-deflection equations');
+ r.mem.forEach(m=>{const k=2*m.EI/m.L,A=m.i-1,Bn=m.i;if(m.kind=='c'){E(`M(${A},${Bn}) = ${g(m.fab)} + ${g(k,4)}(2·${th(A)} + ${th(Bn)} − 3·0)`);E(`M(${Bn},${A}) = ${g(m.fba)} + ${g(k,4)}(2·${th(Bn)} + ${th(A)} − 3·0)`)}
+  else E(`Span ${m.i} is a cantilever (statically determinate): moment at the support from statics = ${g(m.kind=='cl'?m.mba:m.mab)} kN·m`)});
+ H2('5.3 Joint equilibrium and joint rotations');
+ if(!r.un.length)P('All joints are fixed or free: there are no unknown rotations.');
+ r.un.forEach((j,row)=>{E(`Joint ${j}:  ΣM = 0  →  ${r.K[row].map((v,cc)=>v?`${g(v,4)}·θ${r.un[cc]}`:null).filter(Boolean).join(' + ')} = ${g(r.rhs[row],4)}`)});
+ r.un.forEach(j=>E(`θ${j} = ${q(r.th[j])} rad`));r.sup.forEach((s,j)=>{if(s=='fixed')E(`θ${j} = 0 (fixed support)`)});
+ H2('5.4 Final member-end moments');
+ r.mem.forEach(m=>{const k=2*m.EI/m.L,A=m.i-1,Bn=m.i,v=j=>isNaN(r.th[j])?'0':q(r.th[j]);if(m.kind=='c'){E(`M(${A},${Bn}) = ${g(m.fab)} + ${g(k,4)}(2×${v(A)} + ${v(Bn)}) = ${g(m.mab)} kN·m`);E(`M(${Bn},${A}) = ${g(m.fba)} + ${g(k,4)}(2×${v(Bn)} + ${v(A)}) = ${g(m.mba)} kN·m`)}else E(`Span ${m.i}: M(${A},${Bn}) = ${g(m.mab)},  M(${Bn},${A}) = ${g(m.mba)} kN·m`)});
+ tailSections(r,B);return B}
+/* ---- template filling ---- */
+const PARTS=/^word\/(document|header\d*|footer\d*)\.xml$/,PRE=/<w:p[ >][\s\S]*?<\/w:p>/g;
+const subPh=(xml,map)=>xml.replace(PRE,p=>{const t=[...p.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(m=>m[1]).join('');if(!t.includes('{{'))return p;let u=t;for(const k in map)u=u.split('{{'+k+'}}').join(X(map[k]));if(u===t)return p;let fs=1;return p.replace(/<w:t[^>]*>[^<]*<\/w:t>/g,()=>fs?(fs=0,`<w:t xml:space="preserve">${u}</w:t>`):'<w:t></w:t>')});
+async function fillTemplate(buf,body,pngs,info){const fs=await unzip(buf),get=n=>fs.find(x=>x.name==n);let doc=null,found=false;
+ for(const x of fs)if(PARTS.test(x.name)){let s=subPh(dec(x.data),info);if(x.name=='word/document.xml')doc=s;else x.data=enc(s)}
+ if(doc==null)throw Error('word/document.xml not found in template');
+ doc=doc.replace(PRE,p=>!found&&p.replace(/<[^>]+>/g,'').includes('{{REPORT}}')?(found=true,body):p);
+ if(!found){const i=doc.lastIndexOf('<w:sectPr');doc=i<0?doc.replace('</w:body>',body+'</w:body>'):doc.slice(0,i)+body+doc.slice(i)}
+ get('word/document.xml').data=enc(doc);
+ const rl=get('word/_rels/document.xml.rels'),ct=get('[Content_Types].xml');let rs=dec(rl.data),cs=dec(ct.data);
+ pngs.forEach((b,i)=>{rs=rs.replace('</Relationships>',`<Relationship Id="rIdStx${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/struxa${i+1}.png"/></Relationships>`);fs.push({name:`word/media/struxa${i+1}.png`,data:b})});
+ if(!/Extension="png"/i.test(cs))cs=cs.replace(/<Types[^>]*>/,m=>m+'<Default Extension="png" ContentType="image/png"/>');rl.data=enc(rs);ct.data=enc(cs);return{blob:zip(fs),placeholderFound:found}}
+function defaultTemplate(){const N='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"',h=(id,sz,c)=>`<w:style w:type="paragraph" w:styleId="${id}"><w:name w:val="heading ${id.slice(-1)}"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="280" w:after="100"/></w:pPr><w:rPr><w:b/><w:color w:val="${c}"/><w:sz w:val="${sz}"/></w:rPr></w:style>`;
+ return zip([['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'],
+ ['_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+ ['word/_rels/document.xml.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+ ['word/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${N}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>${h('Heading1',30,'E8710A')}${h('Heading2',25,'6B4226')}</w:styles>`],
+ ['word/document.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${N}><w:body><w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Structural Analysis Report — {{PROJECT_NAME}}</w:t></w:r></w:p><w:p><w:r><w:t>{{REPORT}}</w:t></w:r></w:p><w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`]].map(([name,s])=>({name,data:enc(s)}))) }
+/*BROWSER*/
+let LAST=null;
+function toPng(svg,W,H){return new Promise((ok,no)=>{const s=svg.replace(/currentColor/g,'#000').replace('<svg viewBox',`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox`),im=new Image();
+ im.onload=()=>{const c=document.createElement('canvas');c.width=W*2;c.height=H*2;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>b.arrayBuffer().then(a=>ok(new Uint8Array(a))),'image/png')};
+ im.onerror=()=>no(Error('Could not render a diagram'));im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s)})}
+function rptCard(){return`<div class="card"><h3>Project report (Word) — manual solutions</h3><p class="note">Generates a step-by-step report (equations, numerical substitution, results, diagrams) for every item of the project (use the item bar above to add beams, slab strips and frames). All items are re-analysed automatically when you generate the report; the report starts with a summary table when there is more than one item.</p>
+<div class="row"><label>Project name<input id="rp1" style="width:180px"></label><label>Client<input id="rp2" style="width:150px"></label><label>Engineer<input id="rp3" style="width:150px"></label><label>Date<input id="rp4" type="date" value="${new Date().toISOString().slice(0,10)}"></label></div>
+<div class="row" style="margin-top:8px"><label>Your Word template (.docx, optional)<input id="rp5" type="file" accept=".docx" style="width:260px"></label><button onclick="genReport()">Generate Word report</button></div>
+<p class="note">Template markers (type them as plain text in your .docx): <b>{{REPORT}}</b> = where the report is inserted (otherwise it is appended at the end); <b>{{PROJECT_NAME}}</b>, <b>{{CLIENT}}</b>, <b>{{ENGINEER}}</b>, <b>{{DATE}}</b>, <b>{{SYSTEM}}</b> work anywhere, including the header and footer. Page setup, margins, header, footer, fonts and heading styles are taken from your template. Without a template a simple default is used.</p><div id="rpst" class="note"></div></div>`}
+const hh=t=>+t.match(/viewBox="0 0 900 (\d+)"/)[1];
+async function saveBlob(blob,name){if(typeof claude!=='undefined'&&claude&&claude.use){try{const dl=await claude.use('downloads');if(dl){await dl.save({filename:name,data:blob});return}}catch(x){if(x&&x.code=='declined')throw x}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+function partOf(it){S=it;const e=$('err');e.textContent='';run();if(e.textContent)throw Error('"'+it.name+'": '+e.textContent.replace(/^Error: /,''));return{S:it,L:LAST}}
+async function genReport(){const st=$('rpst');st.textContent='Building report…';const keep=S;try{const v=i=>$('rp'+i).value.trim(),n=ITEMS.length,
+ info={PROJECT_NAME:v(1)||'Untitled project',CLIENT:v(2)||'—',ENGINEER:v(3)||'—',DATE:v(4),SYSTEM:n>1?'Project with '+n+' items':SYS[ITEMS[0].mod]};
+ const parts=ITEMS.map(partOf);let B=[],dims=[],pngs=[];
+ if(n>1){const g3=x=>f(x,3);B.push(['h1','Project Summary'],['tbl',['Part','Item','System','Spans','Max sagging moment (kN·m)','Max hogging moment (kN·m)','Max shear (kN)'],parts.map((p,k)=>{const c=crit(p.L.r);return[k+1,p.S.name,SYS[p.S.mod],p.S.spans.length,g3(c.mmax[0]),g3(c.mmin[0]),g3(Math.max(Math.abs(c.vmax[0]),Math.abs(c.vmin[0])))]})])}
+ for(let k=0;k<n;k++){const p=parts[k];S=p.S;LAST=p.L;const r=LAST.r,bl=LAST.flat?buildReportMD(LAST.flat,info):buildReport(r,LAST.M,info),mk=q=>LAST.flat?svgFrame(LAST.flat,q):svg(r,q),sv=mk('v'),sm=mk('m'),off=pngs.length;
+  pngs.push(await toPng(loadSvg(r),900,168),await toPng(sv,900,hh(sv)),await toPng(sm,900,hh(sm)));dims.push(168/900,hh(sv)/900,hh(sm)/900);
+  if(n>1)B.push(['pb'],['h1',`Part ${k+1} — ${p.S.name}`],['p',SYS[p.S.mod]]);bl.forEach(x=>B.push(x[0]=='img'?['img',x[1]+off]:x))}
+ S=keep;const file=$('rp5').files[0],out=await fillTemplate(file?await file.arrayBuffer():await defaultTemplate().arrayBuffer(),toXml(B,dims),pngs,info);
+ await saveBlob(out.blob,'STRUXA_Report_'+(info.PROJECT_NAME.replace(/[^\p{L}\p{N}_-]+/gu,'_').replace(/^_+|_+$/g,'')||'project')+'.docx');
+ st.textContent='Report ready ('+n+' item'+(n>1?'s':'')+').'+(out.placeholderFound?'':' No {{REPORT}} marker was found in your template, so the report was appended at the end of the document.')}catch(x){st.textContent=(x&&x.code=='declined')?'Save cancelled.':'Error: '+(x.message||x)}finally{S=keep;draw();run()}}
+
+/*MD*/
+function svgFrame(o,kind){const r=o.r,n=r.n,T=r.pos[n],cl=S.cols.map(c=>({Hb:+c.Hb||0,Ha:+c.Ha||0})),mH=Math.max(...cl.flatMap(c=>[c.Hb,c.Ha]),1e-9),kH=95/mH,hA=Math.max(...cl.map(c=>c.Ha))*kH,hB=Math.max(...cl.map(c=>c.Hb))*kH,W=900,pl=60,pr=40,pt=34,half=62,y0=pt+hA+half,H=Math.round(y0+Math.max(half,hB)+30),sx=x=>pl+(W-pl-pr)*x/T,isV=kind=='v',sg=isV?1:-1;
+ const X=[],Y=[];let pv=0;r.mem.forEach((m,mi)=>{const bp=m.bp();X.push(m.x0);Y.push(isV?(mi?pv:0):-m.mab);for(let q=0;q<bp.length-1;q++)for(let t=0;t<=40;t++){const x=bp[q]+(bp[q+1]-bp[q])*t/40;X.push(m.x0+x);Y.push(isV?m.sh(x,t==40?'left':'right'):m.M(x))}pv=m.sh(m.L,'right')});
+ const T2=r.pos.at(-1);X.push(T2);Y.push(isV?pv:Y.at(-1));if(isV){X.push(T2);Y.push(0)}
+ const colv=(j,dir)=>{const Hh=dir>0?cl[j].Hb:cl[j].Ha,Mn=dir>0?o.cb[j]:o.ca[j],Mf=dir>0?o.cbf[j]:o.caf[j];return Hh>0?{Hh,Mn,Mf,V:(Mf+Mn)/Hh}:null},all=[];
+ for(let j=0;j<=n;j++)for(const d of[1,-1]){const c=colv(j,d);if(c)all.push(isV?c.V:c.Mn,isV?c.V:c.Mf)}
+ const mx=Math.max(...Y.map(Math.abs),...all.map(Math.abs),1e-9),ky=half*.9/mx,minL=Math.min(...r.mem.map(m=>m.L)),kc=Math.min(52,.4*(W-pl-pr)*minL/T)/mx,sy=y=>y0-sg*y*ky;
+ const col=isV?C.sfd:C.bmd,fo=isV?.85:.55,st=isV?'#8B7500':col,tx=(x,y,v,a='start')=>`<text x="${x}" y="${y}" font-size="11" text-anchor="${a}" fill="currentColor">${f(v,2)}</text>`;
+ let s=`<svg viewBox="0 0 ${W} ${H}"><text x="${pl}" y="16" font-size="13" font-weight="600" fill="currentColor">${isV?'Shear Force Diagram — slab and columns (kN)':'Bending Moment Diagram — slab and columns (kN·m), drawn on the tension side'}</text>`;
+ for(let j=0;j<=n;j++){const jx=sx(r.pos[j]);s+=`<line x1="${jx}" x2="${jx}" y1="${y0-cl[j].Ha*kH}" y2="${y0+cl[j].Hb*kH}" stroke="#6B4226" stroke-width="7" opacity=".35"/><text x="${jx}" y="${H-8}" text-anchor="middle" font-size="11" fill="currentColor">C${j+1}</text>`}
+ s+=`<polygon points="${sx(0)},${y0} ${X.map((x,i)=>sx(x).toFixed(1)+','+sy(Y[i]).toFixed(1)).join(' ')} ${sx(T)},${y0}" fill="${col}" fill-opacity="${fo}" stroke="${st}" stroke-width="1.5"/><line x1="${pl}" x2="${W-pr}" y1="${y0}" y2="${y0}" stroke="currentColor"/>`;
+ for(let j=0;j<=n;j++)for(const d of[1,-1]){const c=colv(j,d);if(!c)continue;const jx=sx(r.pos[j]),ye=y0+d*c.Hh*kH,nx=isV?d:-d,v0=isV?c.V:-c.Mn,v1=isV?c.V:c.Mf,a=jx+nx*v0*kc,b=jx+nx*v1*kc;
+  s+=`<polygon points="${jx},${y0} ${a},${y0} ${b},${ye} ${jx},${ye}" fill="${col}" fill-opacity="${fo}" stroke="${st}" stroke-width="1.5"/>`;
+  s+=isV?tx(jx+nx*v0*kc+(nx>0?4:-4),(y0+ye)/2,c.V,nx>0?'start':'end'):tx(a+(nx>0?4:-4),y0+d*10,-c.Mn,nx>0?'start':'end')+(Math.abs(c.Mf)>1e-9?tx(b+(nx>0?4:-4),ye-d*3,c.Mf,nx>0?'start':'end'):'')}
+ const c=crit(r);if(isV){s+=tx(sx(c.vmax[1])+3,sy(c.vmax[0])-4,c.vmax[0])+tx(sx(c.vmin[1])+3,sy(c.vmin[0])+12,c.vmin[0])}
+ else{c.sm.forEach(q=>{if(Math.abs(q.m)>1e-9)s+=tx(sx(q.x)+3,sy(q.m)+(q.m>0?12:-4),q.m)});c.per.forEach(p=>{[[p.max,p.xmax],[p.min,p.xmin]].forEach(([v,x])=>{if(Math.abs(v)>1e-9&&!r.pos.some(z=>Math.abs(z-x)<1e-9))s+=tx(sx(x)+3,sy(v)+(v>0?12:-4),v)})});c.cf.forEach(q=>s+=`<circle cx="${sx(q[0])}" cy="${y0}" r="3.5" fill="currentColor"/>`)}
+ return s+'</svg>'}
+function mkM(i,L,ls,mab,mba,x0,fab,fba){const W=ls.reduce((s,l)=>s+force(l),0),RA=ls.reduce((s,l)=>s+cumM(l,L),0)/L+(mab+mba)/L;
+ return{i:i+1,kind:'c',L,EI:1,x0,loads:ls,fab,fba,br:[],mab,mba,RA,RB:W-RA,W,
+  sh(x,s='right'){if(x<=0&&s=='left')return 0;let v=RA;for(const l of ls){if(l.k=='p'){if(l.a<x||(l.a==x&&s=='right'))v-=l.P}else v-=cumF(l,x)}return v},
+  M(x){let v=-mab+RA*x;for(const l of ls)v-=cumM(l,x);return v},
+  w(x){return ls.reduce((s,l)=>s+(l.k=='d'&&x>=l.a&&x<=l.b?l.w1+(l.w2-l.w1)*(x-l.a)/(l.b-l.a):0),0)},
+  bp(){const s=new Set([0,L]);ls.forEach(l=>{s.add(l.a);if(l.k=='d')s.add(l.b)});return[...s].sort((a,b)=>a-b)}}}
+function mdAnalyze(P){const n=P.L.length,Is=P.b*P.h**3/12,Ks=P.L.map(L=>4*Is/L),kc=(c,H)=>H>0?4*P.Er*(c.c2*c.c1**3/12)/H:0,Kb=P.cols.map(c=>kc(c,c.Hb)),Ka=P.cols.map(c=>kc(c,c.Ha));
+ if(!(P.b>0&&P.h>0))throw Error('Strip width and slab thickness must be positive.');
+ P.cols.forEach((c,j)=>{if(!(c.c1>0&&c.c2>0))throw Error('Column '+(j+1)+': dimensions must be positive.');if(!(c.Hb>=0&&c.Ha>=0))throw Error('Column '+(j+1)+': heights cannot be negative.');if(!(c.Hb>0||c.Ha>0))throw Error('Column '+(j+1)+': needs a height above or below the slab (0 = no column on that side).')});
+ P.L.forEach((L,i)=>{if(!(L>0))throw Error('Span '+(i+1)+': length must be positive.')});
+ const fm=P.loads.map(ls=>[ls.reduce((s,l)=>s+fem(l)[0],0),ls.reduce((s,l)=>s+fem(l)[1],0)]),DF=[];
+ for(let j=0;j<=n;j++){const kl=j>0?Ks[j-1]:0,kr=j<n?Ks[j]:0,t=kl+kr+Kb[j]+Ka[j];DF.push({sl:kl/t,sr:kr/t,cb:Kb[j]/t,ca:Ka[j]/t,K:t})}
+ let ab=fm.map(f=>f[0]),ba=fm.map(f=>f[1]);const z=()=>Array(n+1).fill(0),cb=z(),ca=z(),cbf=z(),caf=z(),sc=Math.max(1e-300,...fm.flat().map(Math.abs)),cyc=[],hist=[];let ok=false;
+ const lim=P.nc>0?P.nc:2000;for(let it=0;it<=lim;it++){const U=[];for(let j=0;j<=n;j++)U.push(cb[j]+ca[j]+(j>0?ba[j-1]:0)+(j<n?ab[j]:0));const res=Math.max(...U.map(Math.abs));hist.push(res/sc);if(res<=1e-12*sc){ok=true;break}if(it==lim)break;
+  const D=U.map((u,j)=>({sl:-DF[j].sl*u,sr:-DF[j].sr*u,cb:-DF[j].cb*u,ca:-DF[j].ca*u})),nab=ab.slice(),nba=ba.slice();
+  D.forEach((d,j)=>{if(j>0)nba[j-1]+=d.sl;if(j<n)nab[j]+=d.sr;cb[j]+=d.cb;ca[j]+=d.ca;cbf[j]+=.5*d.cb;caf[j]+=.5*d.ca});
+  for(let i=0;i<n;i++){nab[i]+=.5*D[i+1].sl;nba[i]+=.5*D[i].sr}cyc.push({U,D});ab=nab;ba=nba}
+ if(!ok&&!(P.nc>0))throw Error('Moment distribution did not converge in 2000 cycles.');
+ const pos=[0];P.L.forEach(l=>pos.push(pos.at(-1)+l));const mem=P.L.map((L,i)=>mkM(i,L,P.loads[i],ab[i],ba[i],pos[i],fm[i][0],fm[i][1])),R=z(),RM=z();
+ mem.forEach((m,i)=>{R[i]+=m.RA;R[i+1]+=m.RB;RM[i]+=m.mab;RM[i+1]+=m.mba});
+ return{ok,nc:P.nc||0,r:{n,mem,pos,sup:Array(n+1).fill('column'),th:Array(n+1).fill(NaN),R,RM,un:[],delta:z(),K:[],rhs:[]},Ks,Kb,Ka,DF,cyc,hist,cb,ca,cbf,caf,fm}}
+function runFlat(){const M=model(),o=mdAnalyze({L:M.L,loads:M.loads,b:S.bw,h:S.h/1000,Er:S.Er,nc:S.cyc,cols:S.cols.map(c=>({c1:c.c1/1000,c2:c.c2/1000,Hb:c.Hb,Ha:c.Ha}))}),r=o.r,c=crit(r),e=equil(r),n=r.n;
+ let jr=0;for(let j=0;j<=n;j++)jr=Math.max(jr,Math.abs(o.cb[j]+o.ca[j]+(j>0?r.mem[j-1].mba:0)+(j<n?r.mem[j].mab:0)));
+ let h='<h2>Results — Equivalent Frame (Moment Distribution)</h2>';
+ if(S.area)h+=`<div class="card note">Area loads converted to line loads using tributary width: w = q × b = q × ${S.bw} m.</div>`;
+ h+=`<div class="card">${loadSvg(r)}${svgFrame(o,'v')}${svgFrame(o,'m')}<p class="note">Columns are drawn above and below the slab. Joints J1…J${n+1} are the column lines. Signs: shear positive when the left part pushes up; moment positive when sagging (plotted downward); reactions = column loads, positive upward.</p></div>`;
+ h+='<h2>Stiffness and distribution factors</h2><p class="note">Slab: K = 4EI/L with I = b·h³/12. Column: K = 4EI/H, far end fixed, I = c2·c1³/12 (c1 along the frame). E cancels (E column / E slab = '+S.Er+'). DF = K / ΣK at the joint. Torsional (equivalent-column) and non-prismatic column-width effects are not included in this release. Stiffness shown ×10³.</p>'
+  +table(['Joint','K slab left','K slab right','K col. below','K col. above','ΣK','DF slab L','DF slab R','DF col. below','DF col. above'],o.DF.map((d,j)=>['J'+(j+1),j>0?f(o.Ks[j-1]*1e3,4):'—',j<n?f(o.Ks[j]*1e3,4):'—',f(o.Kb[j]*1e3,4),f(o.Ka[j]*1e3,4),f(d.K*1e3,4),f(d.sl,4),f(d.sr,4),f(d.cb,4),f(d.ca,4)]));
+ h+='<h2>Fixed-end moments and distribution</h2>'+table(['Span','FEM at left (kN·m)','FEM at right (kN·m)'],r.mem.map(m=>[m.i,f(m.fab),f(m.fba)]));
+ h+=`<p>${o.ok?`Converged after <b>${o.cyc.length}</b> cycles`+(o.nc>o.cyc.length?` (fewer than the ${o.nc} requested: nothing more to distribute)`:''):`<span class="bad">Stopped after the <b>${o.cyc.length}</b> cycles you requested.</span> Results are approximate.`} Largest unbalanced moment / largest FEM = ${o.hist.at(-1).toExponential(1)} (converged when ≤ 1e-12).</p><details class="card"><summary>Show every distribution cycle (balance, then carry over 0.5 across each slab span)</summary>`+
+  table(['Cycle','Joint','Unbalanced','Δ slab left','Δ slab right','Δ col. below','Δ col. above'],o.cyc.flatMap((cy,k)=>cy.U.map((u,j)=>[k+1,'J'+(j+1),f(u),f(cy.D[j].sl),f(cy.D[j].sr),f(cy.D[j].cb),f(cy.D[j].ca)])))+'</details>';
+ h+='<h2>Final end moments (kN·m, counter-clockwise +)</h2>'+table(['Span','L (m)','M left end','M right end'],r.mem.map(m=>[m.i,f(m.L,3),f(m.mab),f(m.mba)]));
+ h+='<h2>Column moments (kN·m)</h2>'+table(['Column','Below: at slab','Below: far end','Above: at slab','Above: far end'],o.cb.map((v,j)=>['C'+(j+1),f(v),f(o.cbf[j]),f(o.ca[j]),f(o.caf[j])]));
+ h+='<h2>Reactions (column loads)</h2>'+table(['Column','x (m)','Reaction (kN ↑)','Slab moment at column (kN·m)'],r.pos.map((x,j)=>['C'+(j+1),f(x,3),f(r.R[j]),f(c.sm[j].m)]));
+ h+='<h2>Critical values</h2>'+table(['Quantity','Value','at x (m)'],[['Maximum shear',f(c.vmax[0]),f(c.vmax[1])],['Minimum shear',f(c.vmin[0]),f(c.vmin[1])],['Maximum sagging moment',f(c.mmax[0]),f(c.mmax[1])],['Maximum hogging moment',f(c.mmin[0]),f(c.mmin[1])],...c.per.map(p=>['Span '+p.span+' max / min moment',f(p.max)+' / '+f(p.min),f(p.xmax)+' / '+f(p.xmin)])]);
+ h+=`<h2>Equilibrium checks</h2><div class="card">`+table(['Check','Residual','Limit'],[['Vertical forces (relative)',e.vr.toExponential(2),'1e-9'],['Moments about x = 0 (relative)',e.mrr.toExponential(2),'1e-9'],['Joint moments incl. columns (relative)',(jr/Math.max(...r.mem.flatMap(m=>[Math.abs(m.fab),Math.abs(m.fba)]),1e-300)).toExponential(2),'1e-9'],['Member end moments vs bending moment (relative)',e.se.toExponential(2),'1e-9']])+`<p class="${e.ok&&jr<1e-9?'ok':'bad'}">${e.ok&&jr<1e-9?'All equilibrium checks passed.':!o.ok&&e.ok?'Vertical and global moment equilibrium hold, but joint moments are not fully balanced because the distribution was stopped early. Increase the cycles, or leave the field empty, for final results.':'Check FAILED — do not use these results.'}</p></div>`;LAST={r,M,flat:o};
+ $('out').innerHTML=h;focusOut()}
+
+/*PWA*/
+(function(){const P='M70 30C70 14 28 14 28 36C28 56 72 44 72 66C72 86 28 86 28 68';
+ function icon(sz,full){const c=document.createElement('canvas');c.width=c.height=sz;const g=c.getContext('2d'),k=sz/100;g.fillStyle='#E8710A';
+  if(full)g.fillRect(0,0,sz,sz);else{g.beginPath();if(g.roundRect)g.roundRect(0,0,sz,sz,22*k);else g.rect(0,0,sz,sz);g.fill()}
+  g.save();if(full){g.translate(sz/2,sz/2);g.scale(.72,.72);g.translate(-sz/2,-sz/2)}g.scale(k,k);
+  g.strokeStyle='#fff';g.lineWidth=9;g.lineCap='round';g.stroke(new Path2D(P));g.strokeStyle='#111';g.lineWidth=3;g.lineCap='butt';g.beginPath();g.moveTo(14,50);g.lineTo(86,50);g.stroke();g.fillStyle='#111';g.beginPath();g.arc(50,50,5,0,7);g.fill();g.restore();return c.toDataURL('image/png')}
+ const L=(rel,href,sz)=>{const l=document.createElement('link');l.setAttribute('rel',rel);l.setAttribute('href',href);if(sz)l.setAttribute('sizes',sz);document.head.appendChild(l)};
+ if(!document.querySelector('link[rel="manifest"]')){try{ // no static manifest (page not served as a hosted app): build icons and manifest at run time
+  document.querySelectorAll('link[rel~="icon"]').forEach(x=>x.remove());L('icon',icon(64),'64x64');L('apple-touch-icon',icon(180,1),'180x180');
+  const man={name:'STRUXA — Structural Analysis',short_name:'STRUXA',description:'Continuous beams, slab strips and flat-slab frames with step-by-step Word reports.',start_url:location.href.split('#')[0],scope:new URL('.',location.href).href,display:'standalone',background_color:'#ffffff',theme_color:'#E8710A',
+   icons:[{src:icon(192),sizes:'192x192',type:'image/png',purpose:'any'},{src:icon(512),sizes:'512x512',type:'image/png',purpose:'any'},{src:icon(512,1),sizes:'512x512',type:'image/png',purpose:'maskable'}]};
+  L('manifest',URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'})))}catch(e){}}})();
+let DIP=null;const STANDALONE=()=>navigator.standalone||(matchMedia&&matchMedia('(display-mode: standalone)').matches);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();DIP=e});
+function installMsg(t){const m=$('instmsg');m.textContent=t;m.hidden=false;setTimeout(()=>{m.hidden=true},12000)}
+async function installApp(){if(DIP){DIP.prompt();try{await DIP.userChoice}catch(x){}DIP=null;return}
+ const ua=navigator.userAgent,ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform=='MacIntel'&&navigator.maxTouchPoints>1);
+ installMsg(ios?'On iPhone / iPad: tap the Share button in Safari, then "Add to Home Screen".':/android/i.test(ua)?'On Android: open the browser menu (⋮) and choose "Install app" or "Add to Home screen".':'In Chrome or Edge: use the install icon in the address bar, or the menu → "Install STRUXA". In Safari on Mac: File → Add to Dock.')}
+if(STANDALONE())$('inst').hidden=true;
+
+$('rpt').innerHTML=rptCard();example();
+</script><script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})</script>
+</body></html>
