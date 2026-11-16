@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>STRUXA — install check</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:720px;margin:0 auto;padding:16px;color:#111}h1{font-size:20px;border-bottom:3px solid #E8710A;padding-bottom:8px}.r{display:flex;gap:10px;align-items:flex-start;border:1px solid #ddd;border-radius:10px;padding:10px 12px;margin:8px 0}.b{font-weight:700;min-width:54px}.ok{color:#177a3c}.no{color:#b3261e}small{color:#555;display:block}img{width:48px;height:48px;border-radius:8px;background:#eee}code{background:#f3f3f3;padding:1px 4px;border-radius:4px}</style></head><body>
+<h1>STRUXA — install check / فحص التثبيت</h1><p id="where"></p><div id="out">Checking…</div>
+<p><small>Send a screenshot of this page if something is red. / أرسل لقطة شاشة لهذه الصفحة إن ظهر شيء بالأحمر.</small></p>
+<script>
+async function run(){const rows=[],add=(ok,t,d,img)=>rows.push({ok,t,d,img}),base=new URL('.',location.href).href;
+ add(location.protocol=='https:'||location.hostname=='localhost',location.protocol=='https:'?'HTTPS':'HTTPS required','Address: '+location.href+(location.protocol=='https:'?'':' — installing needs https://'));
+ let man=null;
+ try{const r=await fetch('manifest.webmanifest?v=3',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);man=await r.json();add(true,'Manifest found','manifest.webmanifest loaded: name “'+man.name+'”, display “'+man.display+'”.')}
+ catch(e){add(false,'Manifest missing','Could not load '+base+'manifest.webmanifest ('+e.message+'). The file must be in the same folder as index.html.')}
+ if(man){for(const ic of man.icons||[]){const u=new URL(ic.src,new URL('manifest.webmanifest',base)).href;
+   try{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const b=new Uint8Array(await r.arrayBuffer()),png=b[1]==0x50&&b[2]==0x4E&&b[3]==0x47,w=new DataView(b.buffer).getUint32(16),h=new DataView(b.buffer).getUint32(20),want=ic.sizes.split('x').map(Number);
+    add(png&&w==want[0]&&h==want[1],'Icon '+ic.sizes+' ('+ic.purpose+')',png?(w+'×'+h+' PNG found'+((w==want[0]&&h==want[1])?'.':' — but the manifest declares '+ic.sizes+'.')):'File exists but it is not a PNG image.',URL.createObjectURL(new Blob([b],{type:'image/png'})))}
+   catch(e){add(false,'Icon missing: '+ic.sizes,'Could not load '+u+' ('+e.message+'). Upload this exact file name in the same place as index.html (not inside a folder).')}}}
+ for(const f of ['apple-touch-icon.png','favicon.ico','sw.js']){try{const r=await fetch(f,{cache:'no-store'});add(r.ok,f+(r.ok?' found':' missing'),r.ok?'OK':'HTTP '+r.status)}catch(e){add(false,f+' missing',e.message)}}
+ if('serviceWorker' in navigator){try{const g=await navigator.serviceWorker.getRegistration(base);add(!!g,g?'Service worker active':'Service worker not yet active',g?'Offline use is enabled.':'Open the main page once, wait a few seconds, then reload this check.')}catch(e){add(false,'Service worker',e.message)}}
+ else add(false,'Service worker unsupported','This browser has no service worker support.');
+ add(true,'Display mode',(navigator.standalone||matchMedia('(display-mode: standalone)').matches)?'Running as an installed app.':'Running in a normal browser tab.');
+ const bad=rows.filter(r=>!r.ok).length;
+ document.getElementById('out').innerHTML=`<p><b class="${bad?'no':'ok'}">${bad?bad+' problem(s) found':'Everything needed for installation is in place.'}</b></p>`+rows.map(r=>`<div class="r"><span class="b ${r.ok?'ok':'no'}">${r.ok?'OK':'FIX'}</span>${r.img?`<img alt="" src="${r.img}">`:''}<div>${r.t}<small>${r.d}</small></div></div>`).join('')+(bad?'':'<p>If the old install still shows a grey letter: remove the old shortcut, clear this site’s data, reload, and install again.</p>');
+ window.__rows=rows}
+run();
+</script></body></html>
