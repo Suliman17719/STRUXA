@@ -1,0 +1,3 @@
+STRUXA — flat layout: every file (index.html, learn.js, learn-joints.js, learn-failure.js, check.html, manifest.webmanifest, sw.js and the six icon files) sits in the SAME folder. No sub-folders. / كل الملفات في مجلد واحد بلا مجلدات فرعية.
+Optional photos for the Failure Modes lesson: put files named fm-intro.jpg, fm-tension.jpg, fm-compression.jpg, fm-bending.jpg, fm-shear.jpg, fm-torsion.jpg, fm-buckling.jpg, fm-ltb.jpg, fm-local.jpg, fm-punching.jpg, fm-fatigue.jpg, fm-plastic.jpg, fm-connection.jpg in the same folder.
+Open check.html after publishing to verify. افتح check.html بعد النشر للتحقق.
